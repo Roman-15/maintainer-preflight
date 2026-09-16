@@ -63,6 +63,9 @@ maintainer-preflight . --fail-on warning
 # Check documentation links without repository presence checks.
 maintainer-preflight . --no-hygiene
 
+# Skip generated documents for one run, keeping configured exclusions.
+maintainer-preflight . --exclude "docs/generated/**" --exclude "reports/**"
+
 # Save a report for another tool or for review.
 maintainer-preflight . --format json --output preflight.json
 maintainer-preflight . --format markdown --output preflight-report.md
@@ -87,7 +90,7 @@ ignore_rules = ["DOC005"]
 fail_on = "error"
 ```
 
-Use `--config path/to/settings.toml` to select a different configuration file. A command-line `--fail-on` value takes precedence over the configuration. See [configuration](docs/configuration.md) for examples and scope.
+Use `--config path/to/settings.toml` to select a different configuration file. A command-line `--fail-on` value takes precedence over the configuration. Repeat `--exclude "pattern"` to add temporary path exclusions without changing the configuration file. See [configuration](docs/configuration.md) for examples and scope.
 
 ## Continuous integration
 

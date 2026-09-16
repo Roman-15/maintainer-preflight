@@ -103,6 +103,50 @@ class CommandLineTests(unittest.TestCase):
         self.assertEqual(report["markdown_files"], 2)
         self.assertEqual(report["findings"], [])
 
+    def test_repeatable_cli_exclusions_append_to_config_and_preserve_other_settings(self):
+        self.write("README.md")
+        for directory in ["generated", "snapshots", "scratch"]:
+            self.write(f"{directory}/stale.md", "[Broken](absent.md)\n")
+        self.write("docs/guide.md", "[Broken](missing.md)\n[Outside](../../outside.md)\n")
+        configuration = ('[preflight]\nexclude = ["generated/**"]\n'
+                         'ignore_rules = ["LINK004"]\nfail_on = "none"\n')
+        config_path = self.write(".maintainer-preflight.toml", configuration)
+        arguments = ("--exclude", "snapshots/**", "--exclude", "scratch/**")
+
+        report = self.json_result(*arguments)
+        self.assertEqual(report["markdown_files"], 2)
+        self.assertEqual(report["ignored_findings"], 1)
+        link_findings = [item for item in report["findings"]
+                         if item["rule_id"].startswith("LINK")]
+        self.assertEqual([(item["rule_id"], item["path"]) for item in link_findings],
+                         [("LINK001", "docs/guide.md")])
+        self.assertIn("DOC002", [item["rule_id"] for item in report["findings"]])
+        links_only = self.json_result(*arguments, "--no-hygiene", "--fail-on", "error", expected=1)
+        self.assertEqual(links_only["findings"], link_findings)
+        self.assertEqual(links_only["ignored_findings"], 1)
+        self.assertEqual(config_path.read_text(encoding="utf-8"), configuration)
+
+    def test_cli_exclusion_without_config_applies_only_to_current_invocation(self):
+        self.write("README.md")
+        self.write("docs/generated/stale.md", "[Broken](absent.md)\n")
+        excluded = self.json_result("--no-hygiene", "--exclude", "docs/generated/**")
+        self.assertEqual(excluded["markdown_files"], 1)
+        self.assertEqual(excluded["findings"], [])
+
+        ordinary = self.json_result("--no-hygiene", expected=1)
+        self.assertEqual(ordinary["markdown_files"], 2)
+        self.assertEqual([(item["rule_id"], item["path"]) for item in ordinary["findings"]],
+                         [("LINK001", "docs/generated/stale.md")])
+        self.assertFalse((self.root / ".maintainer-preflight.toml").exists())
+
+    def test_empty_cli_exclusion_is_a_helpful_argument_error(self):
+        result = self.run_cli("--exclude", "")
+        self.assertEqual(result.returncode, 2)
+        self.assertEqual(result.stdout, "")
+        self.assertIn("--exclude", result.stderr)
+        self.assertRegex(result.stderr, r"(?i)(non.empty|must not be empty)")
+        self.assertNotIn("Traceback", result.stderr)
+
     def test_dependency_and_build_documents_are_ignored_by_default(self):
         self.write("README.md")
         for directory in [".git", "vendor", "node_modules", ".venv", "build"]:
