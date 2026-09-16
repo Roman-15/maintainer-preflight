@@ -1,0 +1,3 @@
+[preflight]
+exclude = ["reports/**"]
+fail_on = "warning"

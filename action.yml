@@ -1,0 +1,43 @@
+name: Maintainer Preflight
+description: Check local Markdown links and repository essentials without network access during the audit.
+author: Roman-15
+branding:
+  icon: check-circle
+  color: blue
+inputs:
+  path:
+    description: Repository directory to inspect, relative to the workspace.
+    required: false
+    default: '.'
+  fail-on:
+    description: 'Threshold: error, warning, or none. Empty uses repository configuration.'
+    required: false
+    default: ''
+  format:
+    description: 'Report format: text, json, markdown, or sarif.'
+    required: false
+    default: text
+  output:
+    description: Optional file path to save the report.
+    required: false
+    default: ''
+  no-hygiene:
+    description: Set to true to check links without repository presence checks.
+    required: false
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+      with:
+        python-version: '3.12'
+    - name: Audit repository
+      shell: bash
+      env:
+        PREFLIGHT_ACTION_PATH: ${{ github.action_path }}
+        PREFLIGHT_ROOT: ${{ inputs.path }}
+        PREFLIGHT_FAIL_ON: ${{ inputs.fail-on }}
+        PREFLIGHT_FORMAT: ${{ inputs.format }}
+        PREFLIGHT_OUTPUT: ${{ inputs.output }}
+        PREFLIGHT_NO_HYGIENE: ${{ inputs.no-hygiene }}
+      run: python "$PREFLIGHT_ACTION_PATH/action_entry.py"

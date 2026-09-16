@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "maintainer-preflight"
+version = "0.1.0"
+description = "Offline Markdown link and maintainer-readiness checks for open-source repositories"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "Roman-15"}]
+dependencies = []
+keywords = ["markdown", "documentation", "open-source", "ci", "lint"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Quality Assurance",
+]
+
+[project.scripts]
+maintainer-preflight = "maintainer_preflight.cli:main"
+
+[project.urls]
+Repository = "https://github.com/Roman-15/maintainer-preflight"
+Issues = "https://github.com/Roman-15/maintainer-preflight/issues"
+Changelog = "https://github.com/Roman-15/maintainer-preflight/blob/main/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+include = ["maintainer_preflight*"]
