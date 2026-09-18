@@ -9,6 +9,7 @@ maintainer-preflight [path]
   [--fail-on error|warning|none]
   [--no-hygiene]
   [--config path]
+  [--exclude PATTERN]...
   [--version]
 ```
 
@@ -21,6 +22,7 @@ The optional audit path defaults to the current directory. The equivalent source
 | `--fail-on` | Choose which findings cause the command to fail. |
 | `--no-hygiene` | Disable repository presence checks; keep Markdown link checks. |
 | `--config` | Load the given TOML configuration instead of automatic discovery. |
+| `--exclude` | Add one path exclusion for this run; repeat the option for additional patterns. |
 | `--version` | Print the installed version and exit. |
 | `--help` | Show command-line usage. |
 
@@ -53,6 +55,14 @@ Write exclusion patterns relative to the audit root with forward slashes. Matchi
 
 Path exclusions apply to Markdown scanning. They do not make an existing link target count as missing and do not change repository presence checks.
 
+For a temporary exclusion, pass `--exclude` instead of editing the configuration file:
+
+```sh
+maintainer-preflight ../library --exclude "docs/generated/**" --exclude "reports/**"
+```
+
+Each option accepts one non-empty pattern, using the same syntax and audit-root-relative paths as the `exclude` setting. Quote patterns to prevent your shell from expanding wildcards. CLI patterns are added to configured exclusions and apply only to this invocation; the configuration file is not changed.
+
 Use exact identifiers from the [check reference](checks.md), such as `DOC005`. Prefer narrow path exclusions or specific rule suppressions over disabling checks you still want to rely on.
 
 Configuration is validated strictly: unknown keys, unknown rule identifiers, incorrect value types, and invalid thresholds are errors. The file must contain only a `[preflight]` table, be at most 64 KiB, and be a regular UTF-8 file. Symbolic links, Windows reparse points, directories, and special files are rejected.
@@ -62,7 +72,8 @@ Configuration is validated strictly: unknown keys, unknown rule identifiers, inc
 1. `--config` selects one explicit configuration file; it replaces automatic `.maintainer-preflight.toml` discovery rather than merging the two.
 2. Without `--config`, the file at the audit root is loaded if present.
 3. `--fail-on` overrides the selected configuration's `fail_on` value.
-4. Settings that are not specified use their built-in defaults.
+4. Each `--exclude` pattern is appended to the selected configuration's `exclude` patterns.
+5. Settings that are not specified use their built-in defaults.
 
 An explicit configuration path is interpreted from the current working directory. Exclusion patterns inside that file still apply to the audit root.
 

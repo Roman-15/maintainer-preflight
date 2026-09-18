@@ -1,6 +1,7 @@
 """Command-line entry point."""
 
 import argparse
+from dataclasses import replace
 import os
 from pathlib import Path
 import sys
@@ -10,6 +11,12 @@ from . import __version__
 from .config import ConfigurationError, load_config
 from .reporters import render
 from .scanner import audit
+
+
+def _exclude_pattern(value: str) -> str:
+    if not value:
+        raise argparse.ArgumentTypeError("exclusion pattern must be non-empty")
+    return value
 
 
 def _write_output(path: Path, content: str) -> None:
@@ -33,6 +40,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, help="write report atomically to this file instead of stdout")
     parser.add_argument("--fail-on", choices=("error", "warning", "none"), help="exit threshold (default: error)")
     parser.add_argument("--config", type=Path, help="explicit TOML config (default: repository's .maintainer-preflight.toml)")
+    parser.add_argument("--exclude", action="append", default=[], type=_exclude_pattern, metavar="PATTERN",
+                        help="add a repository-relative path exclusion for this run (repeatable)")
     parser.add_argument("--no-hygiene", action="store_true", help="check Markdown links only")
     parser.add_argument("--version", action="version", version=f"maintainer-preflight {__version__}")
     args = parser.parse_args(argv)
@@ -41,6 +50,7 @@ def main(argv: list[str] | None = None) -> int:
         if not root.is_dir():
             raise ConfigurationError(f"Repository path is not a directory: {args.path}")
         config = load_config(root, args.config)
+        config = replace(config, exclude=config.exclude + tuple(args.exclude))
         report = audit(root, config, hygiene=not args.no_hygiene)
         content = render(report, args.format)
         if args.output is not None:

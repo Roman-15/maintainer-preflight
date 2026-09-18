@@ -2,6 +2,12 @@
 
 Changes intended for users are recorded here. Releases are distributed from this repository; the package is not currently published to a package registry.
 
+## Unreleased
+
+### Added
+
+- Repeatable `--exclude PATTERN` CLI option for temporary path exclusions that supplement repository configuration without changing it.
+
 ## 0.1.0 - 2026-09-16
 
 ### Added
