@@ -25,6 +25,10 @@ inputs:
     description: Set to true to check links without repository presence checks.
     required: false
     default: 'false'
+  exclude:
+    description: Additional repository-relative exclusion patterns, one per line. Blank lines are ignored.
+    required: false
+    default: ''
 runs:
   using: composite
   steps:
@@ -40,4 +44,5 @@ runs:
         PREFLIGHT_FORMAT: ${{ inputs.format }}
         PREFLIGHT_OUTPUT: ${{ inputs.output }}
         PREFLIGHT_NO_HYGIENE: ${{ inputs.no-hygiene }}
+        PREFLIGHT_EXCLUDE: ${{ inputs.exclude }}
       run: python "$PREFLIGHT_ACTION_PATH/action_entry.py"

@@ -109,7 +109,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: Roman-15/maintainer-preflight@v0.1.0
+      - uses: Roman-15/maintainer-preflight@v0.2.0
 ```
 
 The action checks the checked-out repository and reads its `.maintainer-preflight.toml` when present. For production workflows, pin the Preflight action to the full commit SHA of the reviewed release. Action setup may download Python; the audit itself runs offline and does not execute code from the repository being checked.
@@ -123,8 +123,21 @@ Optional action inputs:
 | `format` | `text` | Report as `text`, `json`, `markdown`, or `sarif`. |
 | `output` | Empty | Save the report to a file instead of standard output. |
 | `no-hygiene` | `false` | Set to `true` to check links without repository presence checks. |
+| `exclude` | Empty | Additional repository-relative patterns, one per line; appends to configured exclusions. |
 
 For example, add `with: {fail-on: warning}` to the Preflight step to fail on warnings as well as errors. Report creation and upload are separate steps; selecting SARIF output alone does not upload it to GitHub code scanning.
+
+To skip generated documentation for a particular workflow:
+
+```yaml
+- uses: Roman-15/maintainer-preflight@v0.2.0
+  with:
+    exclude: |
+      docs/generated/**
+      reports/**
+```
+
+Write one pattern per line without shell quotes. Blank lines and surrounding whitespace are ignored; spaces within a pattern are preserved. These patterns supplement the repository configuration for this audit and do not alter the configuration file. Exclusions affect Markdown scanning, including in the action; repository presence checks still run.
 
 When checking a local checkout of this tool in another CI system, run the following after Python setup:
 

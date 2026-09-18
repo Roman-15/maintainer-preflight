@@ -38,6 +38,9 @@ jobs:
         uses: ./
         with:
           fail-on: warning
+          exclude: |
+            docs/generated/**
+            reports/**
   package:
     runs-on: ubuntu-latest
     steps:

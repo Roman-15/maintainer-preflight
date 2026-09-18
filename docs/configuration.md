@@ -63,6 +63,8 @@ maintainer-preflight ../library --exclude "docs/generated/**" --exclude "reports
 
 Each option accepts one non-empty pattern, using the same syntax and audit-root-relative paths as the `exclude` setting. Quote patterns to prevent your shell from expanding wildcards. CLI patterns are added to configured exclusions and apply only to this invocation; the configuration file is not changed.
 
+In the GitHub Action, the `exclude` input accepts one pattern per line and adds those patterns in the same way. Blank lines and surrounding whitespace are ignored. Do not add shell quotes to action patterns; they are passed directly as literal arguments. See the [workflow example](../README.md#continuous-integration).
+
 Use exact identifiers from the [check reference](checks.md), such as `DOC005`. Prefer narrow path exclusions or specific rule suppressions over disabling checks you still want to rely on.
 
 Configuration is validated strictly: unknown keys, unknown rule identifiers, incorrect value types, and invalid thresholds are errors. The file must contain only a `[preflight]` table, be at most 64 KiB, and be a regular UTF-8 file. Symbolic links, Windows reparse points, directories, and special files are rejected.
